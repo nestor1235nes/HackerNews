@@ -78,47 +78,51 @@ function StoryCommentsPage() {
     setPage(nextPage)
   }
 
-  function renderCommentsPagination(position) {
+  function renderCommentsPagination() {
     if (totalCommentPages <= 1) {
       return null
     }
 
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', py: 1 }}>
-        <Stack spacing={1} alignItems="center">
-          <Typography variant="body2" color="text.secondary">
-            Pagina {page} de {totalCommentPages} ({position})
-          </Typography>
-          <Pagination
-            page={page}
-            count={totalCommentPages}
-            onChange={handleCommentsPageChange}
-            color="primary"
-            shape="rounded"
-          />
-        </Stack>
+        <Pagination
+          page={page}
+          count={totalCommentPages}
+          onChange={handleCommentsPageChange}
+          shape="rounded"
+          sx={{
+            '& .MuiPaginationItem-root': {
+              color: '#49515a',
+              borderColor: '#d9d2cc',
+            },
+            '& .Mui-selected': {
+              backgroundColor: '#e86a18 !important',
+              color: '#fff',
+            },
+          }}
+        />
       </Box>
     )
   }
 
   return (
-    <Paper elevation={1} sx={{ p: 3 }}>
+    <Paper elevation={0} className="forum-card" sx={{ p: { xs: 2, md: 3 } }}>
       <Stack spacing={1.5}>
-        <Typography component="h2" variant="h5" fontWeight={700} gutterBottom>
-          Comentarios de Story
+        <Typography component="h2" variant="h5" fontWeight={700} gutterBottom color="#2a2f36">
+          Comentarios de la historia
         </Typography>
 
-        {loading ? <CircularProgress size={26} /> : null}
+        {loading ? <CircularProgress size={26} sx={{ color: '#e86a18' }} /> : null}
         {!loading && error ? <Alert severity="error">{error}</Alert> : null}
 
         {!loading && !error && story ? (
           <>
-            <Typography variant="h6">{story.title}</Typography>
+            <Typography variant="h6" color="#2a2f36">{story.title}</Typography>
             <Typography color="text.secondary">Autor: {story.by}</Typography>
             <Typography color="text.secondary">Comentarios: {story.descendants}</Typography>
             {story.url ? (
-              <Link href={story.url} target="_blank" rel="noreferrer" underline="hover">
-                Abrir articulo original
+              <Link href={story.url} target="_blank" rel="noreferrer" underline="hover" color="#e86a18">
+                Abrir artículo original
               </Link>
             ) : null}
 
@@ -126,16 +130,16 @@ function StoryCommentsPage() {
               Mostrando comentarios {firstCommentNumber}-{lastCommentNumber} de {comments.length}.
             </Typography>
 
-            {renderCommentsPagination('arriba')}
+            {renderCommentsPagination()}
 
             {truncated ? (
               <Alert severity="info">
-                Se cargaron {loadedComments} comentarios por limite de seguridad para mantener buen rendimiento.
+                Se cargaron {loadedComments} comentarios por un límite de seguridad para mantener buen rendimiento.
               </Alert>
             ) : null}
 
             <CommentTree comments={pagedComments} />
-            {renderCommentsPagination('abajo')}
+            {renderCommentsPagination()}
           </>
         ) : null}
       </Stack>

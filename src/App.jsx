@@ -1,26 +1,77 @@
-import { memo, useMemo } from 'react'
-import { Link as RouterLink, Outlet } from 'react-router-dom'
-import { AppBar, Box, Container, Link, Toolbar, Typography } from '@mui/material'
+import { memo } from 'react'
+import { Link as RouterLink, Outlet, useLocation } from 'react-router-dom'
+import { Box, Container, Link, Stack, Typography } from '@mui/material'
+
+const NAV_ITEMS = [
+  { id: 'novedades', label: 'Novedades', href: '/top' },
+  { id: 'hilos', label: 'Hilos', href: '/top' },
+  { id: 'preguntas', label: 'Preguntas', href: '/top' },
+  { id: 'mostrar', label: 'Mostrar', href: '/top' },
+  { id: 'empleos', label: 'Empleos', href: '/top' },
+  { id: 'publicar', label: 'Publicar', href: '/top' },
+]
 
 const App = memo(function App() {
-  const pageStyle = useMemo(() => ({ minHeight: '100vh', backgroundColor: '#f7f8fa' }), [])
-  const toolbarStyle = useMemo(() => ({ display: 'flex', justifyContent: 'space-between' }), [])
+  const location = useLocation()
+  const isTopRoute = location.pathname === '/top' || location.pathname === '/'
 
   return (
-    <Box sx={pageStyle}>
-      <AppBar position="sticky" color="default" elevation={1}>
-        <Toolbar sx={toolbarStyle}>
-          <Typography component="h1" variant="h6" fontWeight={700}>
-            Hacker News Explorer
+    <Box className="app-shell">
+      <Box component="header" className="forum-header">
+        <Container maxWidth="lg" className="forum-header__inner">
+          <Typography component="h1" className="forum-title">
+            TechNews Forum
           </Typography>
-          <Link component={RouterLink} to="/top" underline="hover" color="inherit">
-            Top Stories
-          </Link>
-        </Toolbar>
-      </AppBar>
 
-      <Container maxWidth="lg" sx={{ py: 3 }}>
+          <Stack component="nav" direction="row" spacing={2.5} className="forum-nav">
+            {NAV_ITEMS.map((item) => {
+              const isActive = isTopRoute && item.id === 'novedades'
+
+              return (
+                <Link
+                  key={item.label}
+                  component={RouterLink}
+                  to={item.href}
+                  underline="none"
+                  className={`forum-nav__item ${isActive ? 'is-active' : ''}`}
+                >
+                  {item.label}
+                </Link>
+              )
+            })}
+          </Stack>
+        </Container>
+      </Box>
+
+      <Container maxWidth="lg" sx={{ py: { xs: 2, md: 3 } }}>
         <Outlet />
+
+        <Stack
+          direction="row"
+          spacing={1.5}
+          justifyContent="center"
+          sx={{ mt: 2.5, color: '#6f7680', flexWrap: 'wrap' }}
+        >
+          <Link component={RouterLink} to="/top" underline="hover" color="inherit">
+            Guías
+          </Link>
+          <Typography>|</Typography>
+          <Link component={RouterLink} to="/top" underline="hover" color="inherit">
+            FAQ
+          </Link>
+          <Typography>|</Typography>
+          <Link component={RouterLink} to="/top" underline="hover" color="inherit">
+            Contacto
+          </Link>
+          <Typography>|</Typography>
+          <Link component={RouterLink} to="/top" underline="hover" color="inherit">
+            Privacidad
+          </Link>
+          <Typography>|</Typography>
+          <Link component={RouterLink} to="/top" underline="hover" color="inherit">
+            Términos
+          </Link>
+        </Stack>
       </Container>
     </Box>
   )

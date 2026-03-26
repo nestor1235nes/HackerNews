@@ -28,7 +28,7 @@ const CommentNode = memo(function CommentNode({ comment, level = 0 }) {
     () => ({
       pl: level > 0 ? 2 : 0,
       ml: level > 0 ? 1 : 0,
-      borderLeft: level > 0 ? '2px solid #e0e0e0' : 'none',
+      borderLeft: level > 0 ? '2px solid #f0d7c5' : 'none',
     }),
     [level],
   )
@@ -36,10 +36,14 @@ const CommentNode = memo(function CommentNode({ comment, level = 0 }) {
   return (
     <Box sx={nodeStyle}>
       <Stack spacing={0.5} sx={{ py: 1.25 }}>
-        <Typography variant="body2" fontWeight={700}>
+        <Typography variant="body2" fontWeight={700} color="#2a2f36">
           {comment.by}
         </Typography>
-        <Typography variant="body2" color={isUnavailable ? 'text.disabled' : 'text.primary'}>
+        <Typography
+          variant="body2"
+          color={isUnavailable ? 'text.disabled' : 'text.primary'}
+          sx={{ lineHeight: 1.55 }}
+        >
           {text}
         </Typography>
       </Stack>
@@ -54,7 +58,7 @@ const CommentNode = memo(function CommentNode({ comment, level = 0 }) {
 })
 
 const CommentTree = memo(function CommentTree({ comments }) {
-  const emptyMessage = useMemo(() => 'Esta historia aun no tiene comentarios.', [])
+  const emptyMessage = useMemo(() => 'Esta historia aún no tiene comentarios.', [])
 
   if (!Array.isArray(comments) || comments.length === 0) {
     return (
