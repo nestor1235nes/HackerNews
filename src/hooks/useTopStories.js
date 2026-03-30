@@ -5,6 +5,7 @@ const PAGE_SIZE = 50
 
 export function useTopStories() {
   const [items, setItems] = useState([])
+  const [allItems, setAllItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [page, setPage] = useState(1)
@@ -23,6 +24,7 @@ export function useTopStories() {
 
         if (!cancelled) {
           setBestStoryIds(ids)
+          setAllItems([])
         }
       } catch (requestError) {
         if (!cancelled) {
@@ -43,6 +45,36 @@ export function useTopStories() {
       cancelled = true
     }
   }, [])
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadAllStoriesForTopicAnalytics() {
+      if (bestStoryIds.length === 0) {
+        setAllItems([])
+        return
+      }
+
+      try {
+        const apiItems = await getItemsByIds(bestStoryIds)
+        const normalizedItems = apiItems.filter((item) => item && item.id)
+
+        if (!cancelled) {
+          setAllItems(normalizedItems)
+        }
+      } catch {
+        if (!cancelled) {
+          setAllItems([])
+        }
+      }
+    }
+
+    loadAllStoriesForTopicAnalytics()
+
+    return () => {
+      cancelled = true
+    }
+  }, [bestStoryIds])
 
   useEffect(() => {
     let cancelled = false
@@ -112,6 +144,7 @@ export function useTopStories() {
 
   return {
     items,
+    allItems,
     loading,
     error,
     page,

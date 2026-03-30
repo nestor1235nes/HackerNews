@@ -133,6 +133,13 @@ async function buildCommentNode(id, context) {
     context.loadedCount += 1
 
     const comment = await getItemById(id)
+    if (!context.loadChildren) {
+      return {
+        ...comment,
+        children: [],
+      }
+    }
+
     const childIds = Array.isArray(comment.kids) ? comment.kids : []
     const childNodes = await Promise.all(childIds.map((childId) => buildCommentNode(childId, context)))
 
@@ -145,21 +152,89 @@ async function buildCommentNode(id, context) {
   }
 }
 
+function normalizePositiveInteger(value, fallbackValue) {
+  const parsedValue = Number(value)
+  if (!Number.isInteger(parsedValue) || parsedValue <= 0) {
+    return fallbackValue
+  }
+
+  return parsedValue
+}
+
+function normalizeNonNegativeInteger(value, fallbackValue) {
+  const parsedValue = Number(value)
+  if (!Number.isInteger(parsedValue) || parsedValue < 0) {
+    return fallbackValue
+  }
+
+  return parsedValue
+}
+
 export async function getStoryWithComments(storyId, options = {}) {
-  const maxNodes = Number(options.maxNodes ?? 400)
+  const maxNodes = normalizePositiveInteger(options.maxNodes, 400)
+  const loadChildren = typeof options.loadChildren === 'boolean' ? options.loadChildren : true
   const story = await getItemById(storyId)
   const context = {
     visited: new Set(),
     loadedCount: 0,
     maxNodes,
+    loadChildren,
   }
 
   const rootCommentIds = Array.isArray(story.kids) ? story.kids : []
-  const comments = await Promise.all(rootCommentIds.map((commentId) => buildCommentNode(commentId, context)))
+  const hasPaginatedOptions = typeof options.limit !== 'undefined' || typeof options.offset !== 'undefined'
+  const offset = hasPaginatedOptions ? normalizeNonNegativeInteger(options.offset, 0) : 0
+  const limit = hasPaginatedOptions
+    ? normalizePositiveInteger(options.limit, 10)
+    : rootCommentIds.length
+  const selectedCommentIds = rootCommentIds.slice(offset, offset + limit)
+  const comments = await Promise.all(
+    selectedCommentIds.map((commentId) => buildCommentNode(commentId, context)),
+  )
+  const loadedRootComments = comments.filter(Boolean)
+  const nextOffset = Math.min(offset + selectedCommentIds.length, rootCommentIds.length)
 
   return {
     story,
-    comments: comments.filter(Boolean),
+    comments: loadedRootComments,
+    totalRootComments: rootCommentIds.length,
+    hasMore: nextOffset < rootCommentIds.length,
+    offset,
+    limit,
+    nextOffset,
+    truncated: context.loadedCount >= maxNodes,
+    loadedComments: context.loadedCount,
+  }
+}
+
+export async function getCommentReplies(commentId, options = {}) {
+  const maxNodes = normalizePositiveInteger(options.maxNodes, 200)
+  const loadChildren = typeof options.loadChildren === 'boolean' ? options.loadChildren : false
+  const limit = normalizePositiveInteger(options.limit, 10)
+  const offset = normalizeNonNegativeInteger(options.offset, 0)
+
+  const parentComment = await getItemById(commentId)
+  const replyIds = Array.isArray(parentComment.kids) ? parentComment.kids : []
+  const selectedReplyIds = replyIds.slice(offset, offset + limit)
+  const context = {
+    visited: new Set(),
+    loadedCount: 0,
+    maxNodes,
+    loadChildren,
+  }
+
+  const replies = await Promise.all(selectedReplyIds.map((id) => buildCommentNode(id, context)))
+  const loadedReplies = replies.filter(Boolean)
+  const nextOffset = Math.min(offset + selectedReplyIds.length, replyIds.length)
+
+  return {
+    parentCommentId: Number(commentId),
+    replies: loadedReplies,
+    totalReplies: replyIds.length,
+    hasMore: nextOffset < replyIds.length,
+    offset,
+    limit,
+    nextOffset,
     truncated: context.loadedCount >= maxNodes,
     loadedComments: context.loadedCount,
   }
