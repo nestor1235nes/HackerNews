@@ -214,6 +214,8 @@ function TopPage() {
     return Math.ceil(sortedItems.length / pageSize)
   }, [sortedItems.length, pageSize])
 
+  const isSidebarLoading = loading
+
   useEffect(() => {
     setPage(1)
   }, [pageSize, sortBy, dateDirection, pointsDirection, setPage])
@@ -318,7 +320,7 @@ function TopPage() {
 
           {loading ? (
             <Box sx={{ py: 7, display: 'flex', justifyContent: 'center' }}>
-              <CircularProgress />
+              <CircularProgress sx={{ color: '#e86a18' }} />
             </Box>
           ) : null}
 
@@ -389,7 +391,11 @@ function TopPage() {
       </Stack>
 
       <Stack spacing={2} className="forum-side-column">
-        <Paper elevation={0} className="forum-card forum-side-card forum-trending-card">
+        <Paper
+          elevation={0}
+          className={`forum-card forum-side-card forum-trending-card ${isSidebarLoading ? 'is-loading' : ''}`}
+          aria-busy={isSidebarLoading}
+        >
           <Typography variant="h6" className="forum-side-title">
             Temas en tendencia
           </Typography>
@@ -399,6 +405,7 @@ function TopPage() {
                 variant={selectedTopic === ALL_TOPICS_KEY ? 'contained' : 'text'}
                 className="forum-topic-btn"
                 onClick={() => handleTopicFilter(ALL_TOPICS_KEY)}
+                disabled={isSidebarLoading}
               >
                 Todos los temas ({totalStories})
               </Button>
@@ -409,6 +416,7 @@ function TopPage() {
                   variant={selectedTopic === topic.id ? 'contained' : 'text'}
                   className="forum-topic-btn"
                   onClick={() => handleTopicFilter(topic.id)}
+                  disabled={isSidebarLoading}
                 >
                   {topic.label} ({topic.count})
                 </Button>
@@ -417,13 +425,17 @@ function TopPage() {
           </Stack>
         </Paper>
 
-        <Paper elevation={0} className="forum-card forum-side-card forum-filter-card">
+        <Paper
+          elevation={0}
+          className={`forum-card forum-side-card forum-filter-card ${isSidebarLoading ? 'is-loading' : ''}`}
+          aria-busy={isSidebarLoading}
+        >
           <Typography variant="h6" className="forum-side-title">
             Filtros de noticias
           </Typography>
 
           <Stack spacing={1.2} className="forum-sidebar-filter-controls">
-            <FormControl size="small" fullWidth>
+            <FormControl size="small" fullWidth disabled={isSidebarLoading}>
               <InputLabel id="news-per-page-label">Noticias por página</InputLabel>
               <Select
                 labelId="news-per-page-label"
@@ -444,6 +456,7 @@ function TopPage() {
               variant={sortBy === 'fecha' ? 'contained' : 'outlined'}
               onClick={handleSortByDate}
               className={`forum-sort-toggle ${sortBy === 'fecha' ? 'is-active' : ''}`}
+              disabled={isSidebarLoading}
             >
               Fecha {dateDirection === 'asc' ? '↑' : '↓'}
             </Button>
@@ -452,6 +465,7 @@ function TopPage() {
               variant={sortBy === 'puntos' ? 'contained' : 'outlined'}
               onClick={handleSortByPoints}
               className={`forum-sort-toggle ${sortBy === 'puntos' ? 'is-active' : ''}`}
+              disabled={isSidebarLoading}
             >
               Puntos {pointsDirection === 'asc' ? '↑' : '↓'}
             </Button>

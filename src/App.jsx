@@ -4,11 +4,6 @@ import { Box, Container, Link, Stack, Typography } from '@mui/material'
 
 const NAV_ITEMS = [
   { id: 'novedades', label: 'Novedades', href: '/top' },
-  { id: 'hilos', label: 'Hilos', href: '/top' },
-  { id: 'preguntas', label: 'Preguntas', href: '/top' },
-  { id: 'mostrar', label: 'Mostrar', href: '/top' },
-  { id: 'empleos', label: 'Empleos', href: '/top' },
-  { id: 'publicar', label: 'Publicar', href: '/top' },
 ]
 
 const App = memo(function App() {
